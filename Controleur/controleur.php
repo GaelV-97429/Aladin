@@ -2,19 +2,19 @@
  	require './Modele/modele.php';
 	function accueil()
 	{
-		require './vue/vueAccueil.php';
+		require 'Vue/vueAccueil.php';
 	}
 	function ondemand()
 	{
-		require './vue/vueDemande.php';
+		require 'Vue/vueDemande.php';
 	}
 	function infos()
 	{
-		require './vue/vueInfos.php';
+		require 'Vue/vueInfos.php';
 	}
 	function procedures()
 	{
-		require './vue/vueProcedures.php';
+		require 'Vue/vueProcedures.php';
 	}
 	function pdfCli()
 	{
@@ -24,7 +24,7 @@
 		$telMail = getTelMail(str_replace("¤",'"',str_replace("*","&",$_GET['Cli'])));
 		$villes = getVille(str_replace("¤",'',str_replace("*","&",$_GET['Cli'])));
 		//var_dump((str_replace("¤","''",str_replace("*","&",$_GET['Cli']))));
-		require './vue/vueCliPDF.php';
+		require 'Vue/vueCliPDF.php';
 	}
 	function produits()
 	{
@@ -36,7 +36,7 @@
 		$telMails = getTelMail();
 		$adresses = getVille();
 		$clients = getClients();
-		require './vue/vueProduits.php';
+		require 'Vue/vueProduits.php';
 	}
 	function clients()
 	{
@@ -45,11 +45,11 @@
 		$formesJuridiques = getFormeJuridique();
 		$telMail = getTelMail();
 		$villes = getVille();
-		require './vue/vueClients.php';
+		require 'Vue/vueClients.php';
 	}
 	function inscription()
 	{
-		require './vue/vueInscription.php';
+		require 'Vue/vueInscription.php';
 	}
 	function devis()
 	{
@@ -58,7 +58,7 @@
 		$categories = getCategories1();
 		$formesJuridiques = getFormeJuridique();
 		$telMail = getTelMail();
-		require './vue/vueDevis.php';
+		require 'Vue/vueDevis.php';
 	}
 	function facture()
 	{
@@ -67,23 +67,23 @@
 		$categories = getCategories();
 		$formesJuridiques = getFormeJuridique();
 		$fournisseurs = getFournisseurs();
-		require './Vue/vueFacture.php';
+		require 'Vue/vueFacture.php';
 	}
 	function systeme()
 	{
-		require './vue/vueSysteme.php';
+		require 'Vue/vueSysteme.php';
 	}
 	function profil()
 	{
-		require './vue/vueProfil.php';
+		require 'Vue/vueProfil.php';
 	}
 	function changeuser($msg = "")
 	{
-		require './vue/vueChangeUser.php';
+		require 'Vue/vueChangeUser.php';
 	}
 	function connexion($msg = "")
 	{
-		require './vue/vueConnexion.php';
+		require 'Vue/vueConnexion.php';
 	}
 	function verificationConnexion()
 	{
@@ -105,8 +105,16 @@
 			$req = str_replace(CHR(164), "\n", explode("*", $array)[$i]);
 			execute($req);
 		}
-		header("Location: vue/sauvegarde.php?x=test");
-	}	 
+		header("Location: Vue/sauvegarde.php?x=test");
+	}	
+	function pdf()
+	{
+		$telMail = getTelMail();
+		$adresses = getVille();
+		$produit = getProduits($_GET['prod']);
+		$fournisseurs = getFournisseurs($_GET['prod']);
+		require 'Vue/vueProdPdf.php';
+	} 
 
 	 
 ?>
