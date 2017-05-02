@@ -1,6 +1,6 @@
 <?php
 	@session_start();
-	if (isset($_SESSION['infoUtilisateur']))
+	if (isset($_SESSION['infoUtilisateur']))	#Vérification d'une session existante
 	{
 ?>
 <!DOCTYPE html>
@@ -19,7 +19,7 @@
 	$tvaPourcent = array(0 => "", 1 => "", 2 => "", 3 => "", 4 => "", 5 => "");
 	$y = 0;
 	$z = 0;
-	while ($resultat = $produits->fetch(PDO::FETCH_ASSOC))
+	while ($resultat = $produits->fetch(PDO::FETCH_ASSOC))	#Récupération des libellés et des pourcentages de TVA  
 	{
 		if (!in_array($resultat['tva_libelle'], $tvaLib)) 
 		{
@@ -48,13 +48,13 @@
 					]];
 	$categorie = array();
 	$FJ = array();
-	$lstFournisseurs = [0 => ""];
+	$lstFournisseurs = array();
 	$saveF = [];
 	$i = 0;
 	$y = 0;
 	$z = 0;
-
-	while ($resultatP = $produits->fetch(PDO::FETCH_ASSOC))
+	
+	while ($resultatP = $produits->fetch(PDO::FETCH_ASSOC))	#Récupération des informations des produits
 	{
 		$y = 0;
 		$lstProduits[$i]["referenceProd"] = $resultatP['pro_reference'];
@@ -70,7 +70,7 @@
 		$i++;
 	}
 	$i = -1;
-	while ($resultatF = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 
+	while ($resultatF = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 	#Récupération des informations des fournisseurs
 	{
 		if (!in_array($resultatF['ent_raison_sociale'], $saveF))
 		{
@@ -79,7 +79,10 @@
 		if (!in_array($resultatF['ent_raison_sociale'], $saveF))
 		{
 			$lstFournisseurs[$i]["raisonSociale"] = $resultatF['ent_raison_sociale'];
-			$lstFournisseurs[$i]["produit"][] = $resultatF['pro_lib_rech'];
+			if ($resultatF['pro_lib_rech'] != null)
+			{
+				$lstFournisseurs[$i]["produit"][sizeof($lstFournisseurs[$i]["produit"])] = $resultatF['pro_lib_rech'];
+			}
 			$lstFournisseurs[$i]["codeEntite"] = $resultatF['ent_code_entite'];
 			$lstFournisseurs[$i]["contact"] = $resultatF['ent_lib_contact'];
 			$lstFournisseurs[$i]["siret"] = $resultatF['ent_siret'];
@@ -94,25 +97,19 @@
 			$lstFournisseurs[$i]["rechFormeJuridique"] = $resultatF['foj_lib_rech'];
 			$lstFournisseurs[$i]["rechRaisonSociale"] = $resultatF['ent_raison_rech'];
 			$lstFournisseurs[$i]["telephoneFixe"] = "";
-			$lstFournisseurs[$i]["telephoneFixeActif"] = "";
 			$lstFournisseurs[$i]["fax"] = "";
-			$lstFournisseurs[$i]["faxActif"] = "";
 			$lstFournisseurs[$i]["mobile"] = "";
-			$lstFournisseurs[$i]["mobileActif"] = "";
-			if ($resultatF['tpi_indicateur'] == 1) 
+			switch ($resultatF['tpi_indicateur'])
 			{
-				$lstFournisseurs[$i]["telephoneFixe"] = $resultatF['lstt_numero'];
-				$lstFournisseurs[$i]["telephoneFixeActif"] = $resultatF['lstt_coord_defaut'];
-			}
-			else if ($resultatF['tpi_indicateur'] == 2)
-			{
-				$lstFournisseurs[$i]["fax"] = $resultatF['lstt_numero'];
-				$lstFournisseurs[$i]["faxActif"] = $resultatF['lstt_coord_defaut'];
-			}
-			else if ($resultatF['tpi_indicateur'] == 3)
-			{
-				$lstFournisseurs[$i]["mobile"] = $resultatF['lstt_numero'];
-				$lstFournisseurs[$i]["mobileActif"] = $resultatF['lstt_coord_defaut'];
+				case 1:
+					$lstFournisseurs[$i]["telephoneFixe"] = $resultatF['lstt_numero'];
+					break;
+				case 2:
+					$lstFournisseurs[$i]["fax"] = $resultatF['lstt_numero'];
+					break;
+				case 3:
+					$lstFournisseurs[$i]["mobile"] = $resultatF['lstt_numero'];
+					break;
 			}
 			$saveF[] = $resultatF['ent_raison_sociale'];
 		}
@@ -130,20 +127,17 @@
 			{
 				$lstFournisseurs[$i]["produit"][] = $resultatF['pro_lib_rech'];
 			}
-			if ($resultatF['tpi_indicateur'] == 1) 
+			switch ($resultatF['tpi_indicateur'])
 			{
-				$lstFournisseurs[$i]["telephoneFixe"] = $resultatF['lstt_numero'];
-				$lstFournisseurs[$i]["telephoneFixeActif"] = $resultatF['lstt_coord_defaut'];
-			}
-			else if ($resultatF['tpi_indicateur'] == 2)
-			{
-				$lstFournisseurs[$i]["fax"] = $resultatF['lstt_numero'];
-				$lstFournisseurs[$i]["faxActif"] = $resultatF['lstt_coord_defaut'];
-			}
-			else if ($resultatF['tpi_indicateur'] == 3)
-			{
-				$lstFournisseurs[$i]["mobile"] = $resultatF['lstt_numero'];
-				$lstFournisseurs[$i]["mobileActif"] = $resultatF['lstt_coord_defaut'];
+				case 1:
+					$lstFournisseurs[$i]["telephoneFixe"] = $resultatF['lstt_numero'];
+					break;
+				case 2:
+					$lstFournisseurs[$i]["fax"] = $resultatF['lstt_numero'];
+					break;
+				case 3:
+					$lstFournisseurs[$i]["mobile"] = $resultatF['lstt_numero'];
+					break;
 			}
 		}
 	}
@@ -151,7 +145,7 @@
 	$i = 0;
 	$x = 0;
 	$AfficheProduits = "var lstProduits = {\n";
-	foreach ($lstProduits as $key => $value) 
+	foreach ($lstProduits as $key => $value)  #Conversion de la liste PHP de produit et de fournisseur en une liste produit JavaScript
 	{
 		$z = 0;
 		$AfficheProduits.= $i.":{".'referenceProd:"'.$value["referenceProd"].'", libelleProd: "'.$value["libelleProd"].'", descriptionProd: "'.$value["descriptionProd"].'", familleProd: "'.$value['familleProd'].'", prixProd: "'.$value["prixProd"].'", tvaLibelleProd: "'.$value['tvaLibelleProd'].'", tvaProd: "'.$value["tvaProd"].'", actifProd: "'.$value['actifProd'].'", rechLibelleProd: "'.$value['rechLibelleProd'].'", rechFamilleProd: "'.$value['rechFamilleProd'].'",';
@@ -167,7 +161,7 @@
 						
 					}
 					$x++;
-					$AfficheProduits.= $z.':{raisonSociale: "'.$lstFournisseurs[$y]['raisonSociale'].'", produitFournisseur: "'.$value['rechLibelleProd'].'", codeEntite: "'.$lstFournisseurs[$y]['codeEntite'].'", contact: "'.$lstFournisseurs[$y]['contact'].'", siret: "'.$lstFournisseurs[$y]['siret'].'", abreviation: "'.$lstFournisseurs[$y]['abreviation'].'", clefPhonetique: "'.$lstFournisseurs[$y]['clefPhonetique'].'", categorie: "'.$lstFournisseurs[$y]['categorie'].'", adresse: "'.$lstFournisseurs[$y]['adresse'].'", commentaire: "'.$lstFournisseurs[$y]['commentaire'].'", formeJuridique: "'.$lstFournisseurs[$y]['formeJuridique'].'", email: "'.$lstFournisseurs[$y]['email'].'", rechCategorie: "'.$lstFournisseurs[$y]['rechCategorie'].'", rechFormeJuridique: "'.$lstFournisseurs[$y]['rechFormeJuridique'].'", rechRaisonSociale: "'.$lstFournisseurs[$y]['rechRaisonSociale'].'", telephoneFixe: "'.$lstFournisseurs[$y]['telephoneFixe'].'", telephoneFixeActif: "'.$lstFournisseurs[$y]['telephoneFixeActif'].'", mobile: "'.$lstFournisseurs[$y]['mobile'].'", mobileActif: "'.$lstFournisseurs[$y]['mobileActif'].'", fax : "'.$lstFournisseurs[$y]['fax'].'", faxActif: "'.$lstFournisseurs[$y]['faxActif'].'"},';
+					$AfficheProduits.= $z.':{raisonSociale: "'.$lstFournisseurs[$y]['raisonSociale'].'", produitFournisseur: "'.$value['rechLibelleProd'].'", codeEntite: "'.$lstFournisseurs[$y]['codeEntite'].'", contact: "'.$lstFournisseurs[$y]['contact'].'", siret: "'.$lstFournisseurs[$y]['siret'].'", abreviation: "'.$lstFournisseurs[$y]['abreviation'].'", clefPhonetique: "'.$lstFournisseurs[$y]['clefPhonetique'].'", categorie: "'.$lstFournisseurs[$y]['categorie'].'", adresse: "'.$lstFournisseurs[$y]['adresse'].'", commentaire: "'.$lstFournisseurs[$y]['commentaire'].'", formeJuridique: "'.$lstFournisseurs[$y]['formeJuridique'].'", email: "'.$lstFournisseurs[$y]['email'].'", rechCategorie: "'.$lstFournisseurs[$y]['rechCategorie'].'", rechFormeJuridique: "'.$lstFournisseurs[$y]['rechFormeJuridique'].'", rechRaisonSociale: "'.$lstFournisseurs[$y]['rechRaisonSociale'].'", telephoneFixe: "'.$lstFournisseurs[$y]['telephoneFixe'].'", mobile: "'.$lstFournisseurs[$y]['mobile'].'", fax : "'.$lstFournisseurs[$y]['fax'].'"},';
 					$z++;
 				}
 			}
@@ -183,27 +177,224 @@
 	
 	$fournisseurs->closeCursor();
 	$fournisseurs->execute();
-	while ($resultat = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 
+	while ($resultat = $fournisseurs->fetch(PDO::FETCH_ASSOC)) 	
 	{
-		if (!in_array($resultat['cat_libelle'], $categorie)) 
+		if (!in_array($resultat['cat_libelle'], $categorie)) 	#Récupération des catégories de fournisseur
 		{
 			$categorie[] = $resultat['cat_libelle'];
 		}
-		if (!in_array($resultat['foj_libelle'], $FJ)) 
+		if (!in_array($resultat['foj_libelle'], $FJ)) 	#Récupération des forme juridique de fournisseur
 		{
 			$FJ[] = $resultat['foj_libelle'];
 		}
 	}
+	$y = 0;
+	$z = 0;
+	while ($clients->fetch(PDO::FETCH_ASSOC))	#Intialisation de la liste des clients
+	{
+		$lstClients[] = ["T" =>"",
+						 "code" => "",
+                   		 "TypeCli" => "",
+                   		 "Categorie" => "",
+                   		 "typeRechCliNom" => "",
+                   		 "raisonSociale" => "",
+                   		 "typeRechCliPrenom" => "",
+                   		 "Abreviation" => "",
+                   		 "Contact" => "",
+                   		 "Entite" => "",
+                   		 "prenom" => "",
+                   		 "rechNom" => "",
+                   		 "rechPrenom" => "",
+                   		 "Commentaires" => "",
+                   		 "actifPhonetique" => "",
+                   		 "SIRET" => "",
+                   		 "FOJ" => "",
+                   		 "Adresse" => array("adressePrincipale"=>"","adresseSecondaire"=>"","adresseBureau"=>"","adresseCourrier"=>""),
+                   		 "Ville" => "",
+                   		 "Site Internet" => "",
+                   		 "tel" => array("telephoneSociete"=>"","telephoneDomicile"=>"","mobileProfessionnel"=>"","mobilePersonnel"=>"","mobileSociete"=>"","telephoneBureau"=>"","faxDomicile"=>"","faxSociete"=>"","faxBureau"=>""),
+                   		 "mail" => "",
+                 		];
+	}
+    $saveTM = array();
+    $Devis = array();
+    $Facture = array();
+    $categorieCli = array();
+    $FJCli = array();
+    $i = 0;
+    
+	$clients->closeCursor();
+	$clients->execute();
+
+    while ($resultatC = $clients->fetch(PDO::FETCH_ASSOC))	#Récupération des informations des clients
+    {
+        $lstClients[$i]["code"] = $resultatC['per_code_personne'];
+        $lstClients[$i]["Categorie"] = $resultatC['cat_libelle'];
+        $lstClients[$i]["typeRechCliNom"] = str_replace('"',"'",$resultatC['per_nomfamille']);
+        $lstClients[$i]["actifPhonetique"] = $resultatC['cat_iactif'];
+        $lstClients[$i]["T"] = $resultatC['per_titre'];
+        $lstClients[$i]["rechNom"] = str_replace('"',"'",$resultatC['rech_nom_maj']);
+        $lstClients[$i]["rechPrenom"] = str_replace('"',"'",$resultatC['rech_prenom_maj']);
+        $lstClients[$i]["prenom"] = $resultatC['per_prenoms'];
+        $lstClients[$i]["SIRET"] = $resultatC['ent_siret'];
+        $lstClients[$i]["Abreviation"] = $resultatC['ent_abreviation'];
+        $lstClients[$i]["Contact"] = $resultatC['ent_lib_contact'];
+        $lstClients[$i]["Commentaires"] =str_replace(CHR(13).CHR(10),"*",$resultatC['cli_commentaires']);
+        if ($resultatC["per_titre"] >3)
+        {
+        	$lstClients[$i]["FOJ"] = $resultatC['foj_libelle'];
+        }
+        else
+        {
+        	$lstClients[$i]["FOJ"] = $resultatC['per_titre'];
+        }
+        if (!in_array($resultatC['cat_libelle'], $categorieCli)) 	#Récupération des catégories de client
+		{
+			$categorieCli[] = $resultatC['cat_libelle'];
+		}
+        $i++;
+    }
+	$SaveC = [];
+	for ($j=0; $j<=sizeof($lstClients)-1; $j++)
+	{
+		$SaveM = [];
+		while ($resultatTM = $telMails->fetch(PDO::FETCH_ASSOC)) 	#Récupération des mails et différents numéros de téléphones du client
+		{
+			if ($resultatTM["ent_code_entite"] == $lstClients[$j]["code"])
+			{
+				if (!in_array($resultatTM['lstm_mail'], $SaveM))
+				{
+					$lstClients[$j]["mail"] = $resultatTM['lstm_mail'];
+					$SaveM[] = $resultatTM['lstm_mail'];
+				}				
+				if (!in_array($resultatTM["ent_code_entite"], $SaveC))
+				{
+					$i = 0;
+					switch ($resultatTM["lstt_idco_tp_indicateur"]) 
+					{
+						case '1':
+							$lstClients[$j]["tel"]["telephoneDomicile"]=$resultatTM["lstt_numero"];
+							break;
+						case '2':
+							$lstClients[$j]["tel"]["telephoneBureau"]=$resultatTM["lstt_numero"];
+							break;
+						case '3':
+							$lstClients[$j]["tel"]["faxDomicile"]=$resultatTM["lstt_numero"];
+							break;
+						case '4':
+							$lstClients[$j]["tel"]["faxBureau"]=$resultatTM["lstt_numero"];
+							break;
+						case '5':
+							$lstClients[$j]["tel"]["mobilePersonnel"]=$resultatTM["lstt_numero"];
+							break;
+						case '6':
+							$lstClients[$j]["tel"]["mobileProfessionnel"]=$resultatTM["lstt_numero"];
+							break;
+						case '7':
+							$lstClients[$j]["tel"]["faxSociete"]=$resultatTM["lstt_numero"];
+							break;
+						case '8':
+							$lstClients[$j]["tel"]["telephoneSociete"]=$resultatTM["lstt_numero"];
+							break;
+						case '9':
+							$lstClients[$j]["tel"]["mobileSociete"]=$resultatTM["lstt_numero"];
+							break;
+					}
+					$SaveC[] = $resultatTM["ent_code_entite"];
+				}
+				else
+				{
+					$i = sizeof($lstClients[$j]["tel"])-1;
+					switch ($resultatTM["lstt_idco_tp_indicateur"]) 
+					{
+						case '1':
+							$lstClients[$j]["tel"]["telephoneDomicile"]=$resultatTM["lstt_numero"];
+							break;
+						case '2':
+							$lstClients[$j]["tel"]["telephoneBureau"]=$resultatTM["lstt_numero"];
+							break;
+						case '3':
+							$lstClients[$j]["tel"]["faxDomicile"]=$resultatTM["lstt_numero"];
+							break;
+						case '4':
+							$lstClients[$j]["tel"]["faxBureau"]=$resultatTM["lstt_numero"];
+							break;
+						case '5':
+							$lstClients[$j]["tel"]["mobilePersonnel"]=$resultatTM["lstt_numero"];
+							break;
+						case '6':
+							$lstClients[$j]["tel"]["mobileProfessionnel"]=$resultatTM["lstt_numero"];
+							break;
+						case '7':
+							$lstClients[$j]["tel"]["faxSociete"]=$resultatTM["lstt_numero"];
+							break;
+						case '8':
+							$lstClients[$j]["tel"]["telephoneSociete"]=$resultatTM["lstt_numero"];
+							break;
+						case '9':
+							$lstClients[$j]["tel"]["mobileSociete"]=$resultatTM["lstt_numero"];
+							break;
+					}
+				}
+			}
+		}
+		$telMails->closeCursor();
+		$telMails->execute();
+	}
+	while ($resultatVille = $adresses->fetch(PDO::FETCH_ASSOC)) 	#Récupération des informations de coordonnée du client
+	{
+		for ($indexClient=0; $indexClient<=sizeof($lstClients)-1; $indexClient++)
+		{
+			if ($resultatVille["ent_code_entite"] == $lstClients[$indexClient]["code"])
+			{
+				switch($resultatVille["lsta_idco_tp_indicateur"])
+				{
+					case "12":
+						$lstClients[$indexClient]["Adresse"]["adressePrincipale"] = str_replace(CHR(13).CHR(10),"*",$resultatVille["adr_complete"]);
+						break;
+					case "13":
+						$lstClients[$indexClient]["Adresse"]["adresseSecondaire"] = str_replace(CHR(13).CHR(10),"*",$resultatVille["adr_complete"]);
+						break;
+					case "14":
+						$lstClients[$indexClient]["Adresse"]["adresseBureau"] = str_replace(CHR(13).CHR(10),"*",$resultatVille["adr_complete"]);
+						break;
+					case "15":
+						$lstClients[$indexClient]["Adresse"]["adresseCourrier"] = str_replace(CHR(13).CHR(10),"*",$resultatVille["adr_complete"]);
+						break;
+				}
+				$lstClients[$indexClient]["Ville"] = $resultatVille["com_nom_min"];
+				$lstClients[$indexClient]["Site Internet"] = $resultatVille["co_adrinternet"];
+			}
+		}	
+	}	
+		
+
 	$i = 0;
+	$x = 0;
+	$AfficheClients = "var lstClients = {\n";
+	foreach ($lstClients as $key => $value) 	#Conversion de la liste PHP client en liste JavaScript
+	{
+		$AfficheClients.= $i.":{".'T: "'.$value["T"].'", code:"'.$value["code"].'", Categorie: "'.$value["Categorie"].'", typeRechCliNom: "'.$value["typeRechCliNom"].'", prenom: "'.$value["prenom"].'", actifPhonetique: "'.$value['actifPhonetique'].'", SIRET: "'.$value["SIRET"].'", FOJ: "'.$value['FOJ'].'", ville: "'.$value["Ville"].'", rechNom: "'.$value['rechNom'].'", rechPrenom: "'.$value['rechPrenom'].'", abreviation: "'.$value["Abreviation"].'", contact: "'.$value["Contact"].'", website: "'.$value["Site Internet"].'", commentaires: "'.$value["Commentaires"].'",mail:"'.$value['mail'].'",  tel: {telephoneDomicile: "'.$value['tel']["telephoneDomicile"].'", telephoneBureau: "'.$value['tel']["telephoneBureau"].'", faxDomicile: "'.$value['tel']["faxDomicile"].'", faxBureau: "'.$value['tel']["faxBureau"].'", mobilePersonnel: "'.$value['tel']["mobilePersonnel"].'", mobileProfessionnel: "'.$value['tel']["mobileProfessionnel"].'", faxSociete: "'.$value['tel']["faxSociete"].'", telephoneSociete: "'.$value['tel']["telephoneSociete"].'", mobileSociete: "'.$value['tel']["mobileSociete"]. '"}, adresseBureau: "'.$value["Adresse"]["adresseBureau"].'", adressePrincipale: "'.$value["Adresse"]["adressePrincipale"].'", adresseSecondaire: "'.$value["Adresse"]["adresseSecondaire"].'", adresseCourrier: "'.$value["Adresse"]["adresseCourrier"].'"},';
+		$AfficheClients.="\n";
+		$i++;
+	}
+	$i = 0;
+	$AfficheClients[strlen($AfficheClients)-2] = "}";
+	$AfficheClients[strlen($AfficheClients)-1] =";";
 	$AfficheProduits[strlen($AfficheProduits)-2] = "}";
 	echo $AfficheProduits.";\n";
+	echo $AfficheClients."\n\n\n";
 ?>
-	$(document).ready(function(){
-		$("body").keydown(function(event){
-			if (event.keyCode == 27)
+	$(document).ready(function(){ 	
+		$("body").keydown(function(event){		//Initialisation de Raccource clavier
+			if (event.keyCode == 27)	// 27 => Touche Echap. (Fermeture de fenêtre)
 			{
 				switch ("visible")
 				{
+					case (document.getElementById('rechCli').style.visibility):
+						document.getElementById('transparenceProd').style.visibility = 'hidden';
+						document.getElementById('rechCli').style.visibility = 'hidden';
+						break;
 					case (document.getElementById('rechFamilleProd').style.visibility):
 						document.getElementById('transparenceProd').style.visibility = 'hidden';
 						document.getElementById('rechFamilleProd').style.visibility = 'hidden';
@@ -227,8 +418,8 @@
 				}
 			}
 		});
-		$("#containerProd1 input").keydown(function(e){
-			if (e.keyCode == 13) 
+		$("#containerProd1 input").keydown(function(e){	//Initialisation de Raccourci clavier
+			if (e.keyCode == 13) // 13 => Touche Entrée (Lance une recherche)
 			{
 				rechercher();
 			}
@@ -255,14 +446,12 @@
 								  note: ""
 								 };
 	var lstSaveCurrentInfoFourn = [];
-	
-
+	var backupDel = [];
+	var backupAdd = [];
   	</script>
 </head>
-<body>
+<body onload="initDetectRechCli();">
 	<div class="container" id="dev"></div>
-	
-
 
 	<div class="container" id="transparenceMSG" style="z-index: 9"></div>
 	<div class="container" id="containerMSG">
@@ -290,10 +479,10 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-12" style="margin: 2% 0 2% 0;">
-				<button onclick="effacer()" class="btn btn-secondary" style="width: 45%; font-size: 12px; height: 45px; color: #A0522D; background-color: #FFEFD5; hover: #A0522D;">
+				<button onclick="effacer()" class="btn btn-default" style="width: 45%; font-size: 12px; font-weight: bold; height: 45px; color: #990099; background-color: #0088FF;">
 					<span class="glyphicon glyphicon-erase"></span><br> Effacer
 				</button>
-				<button onclick="rechercher()"  style="width: 45%; font-size: 12px; height: 45px; color: #990099" class="btn btn-primary" id="rech">
+				<button onclick="rechercher()"  style="width: 45%; font-size: 12px; font-weight: bold; height: 45px; color: #990099; background-color: #0088FF;" class="btn btn-info" id="rech">
 					<span class="glyphicon glyphicon-search"></span><br> Rechercher
 				</button>
 			</div>
@@ -423,10 +612,10 @@
 
 		<div class="row" style="position: absolute; bottom: 0; right: 0; left: 0; margin-bottom: 2%">
 			<div class="col-sm-12">
-				<button onclick="effacer()" style="width: 45%; font-size: 12px; height: 45px; font-weight: bold; font-size: 13px; color: #990099;" class="btn btn-primary">
+				<button onclick="effacer()" style="width: 45%; font-size: 12px; font-weight: bold; height: 45px; color: #990099; background-color: #0088FF;" class="btn btn-info">
 					<span class="glyphicon glyphicon-erase"></span><br> Effacer
 				</button>
-				<button onclick="rechercher()"  style="width: 45%; font-size: 12px; height: 45px; font-weight: bold; font-size: 13px; color: #990099;" class="btn btn-primary" id="rech">
+				<button onclick="rechercher()"  style="width: 45%; font-size: 12px; font-weight: bold; height: 45px; color: #990099; background-color: #0088FF;" class="btn btn-info" id="rech">
 					<span class="glyphicon glyphicon-search"></span><br> Rechercher
 				</button>
 			</div>
@@ -530,10 +719,10 @@
 		<input type="number" hidden id="TbF" value="0">
 		<div class="row" style="position: absolute; bottom: 5px; right: 5px; width: 100%;">
 		<div class="row"><div class="col-sm-12" style="border-top: 1px solid black; width: 100%; margin-top: -0.6%;"></div></div>
-			<div class="col-sm-8" style="text-align: center;" id="modif"></div>
-			<div class="col-sm-4" style="text-align: right;">
-				<button onclick="enregistrer()" style="width:100px; height: 45px; margin-right: 15px; background-color: #22CC55; padding: 1px; border: 1px solid lightgreen; color: #444444; font-size: 15px;" class="btn btn-warning" id="btnSave"><span class="glyphicon glyphicon-floppy-disk"></span><br>Enregistrer</button>
-				<button onclick="window.close()" style="width:70px; height: 45px; padding: 2px;" class="btn btn-warning"><span class="glyphicon glyphicon-home"></span><br>Quitter</button>
+			<div class="col-sm-12" style="text-align: center; padding: 0;">
+				<div class="alert alert-danger" role="alert" id="modif"><strong>Rappel !</strong> Des modifications ont été apportées, n'oubliez pas d'enregistrer.</div>
+				<button onclick="window.close()" style="width:70px; float: right; height: 45px; padding: 2px; margin-right: 2%;" class="btn btn-warning"><span class="glyphicon glyphicon-home"></span><br>Quitter</button>
+				<button onclick="enregistrer()" style="width: 100px; border: 5px solid lightblue; height: 45px; margin-right: 15px; background-color: #22CC55; padding: 1px; border: 1px solid lightgreen; color: #444444; float: right; font-size: 15px;" class="btn btn-warning" id="btnSave"><span class="glyphicon glyphicon-floppy-disk"></span><br>Enregistrer</button>
 			</div>
 		</div>
 	</div>
@@ -551,15 +740,147 @@
 	<div class="container" id="infoProd" style="visibility: hidden;">
 
 		<div class="container" id="transparenceProd"></div>
+		<div class="container" id="rechCli" style="border-radius: 15px; background-color: #DDDDDD">
+			<div class="container" id="containerRechCliHeader" style="width: 100%; height: 10%; border-bottom: 1px solid black; overflow: auto; overflow-x: hidden">
+				<div class="row" style="height: 50%;">
+					<div class="col-sm-2">
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center;">Code</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center; padding: 0 5px 0 5px;"><input type="text" style=" width: 100%; height: 25px;" id="rechCodeCli"></div>
+						</div>
+					</div>
+					<div class="col-sm-4">
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center;">Nom / Raison sociale</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-6" style="text-align: center; padding: 0 5px 0 5px;">
+								<select style="width: 100%; height: 25px;" id="typeRechNomCli">
+									<option value="*" selected>Commence par</option>
+									<option value="Egal a">Égal à</option>
+									<option value="Contient">Contient</option>
+								</select>
+							</div>
+							<div class="col-sm-6" style="text-align: center; padding: 0 5px 0 5px;"><input type="text" style=" width: 100%; height: 25px;" id="rechNomCli"></div>
+						</div>
+					</div>
+					<div class="col-sm-2">
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center;">Type</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center; padding: 0 5px 0 5px;">
+								<select style="width: 100%; height: 25px;" id="rechTypeCli" disabled>
+									<option value="Entite" selected>Entité</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-2">
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center;">Catégorie</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center; padding: 0 5px 0 5px;">
+								<select style="width: 100%; height: 25px;" id="rechCatCli">
+									<option value="*" selected>Non renseigné</option>
+<?php 
+	for($i = 0; $i <= sizeof($categorieCli)-1; $i++) 
+	{
+		if ($categorieCli[$i] != "") 
+		{
+			echo "<option value='".$categorieCli[$i]."'>".$categorieCli[$i]."</option>\n";
+		}
+	}
+?>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-2">
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center;">SIRET</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12" style="text-align: center; padding: 0 5px 0 5px;"><input type="text" style=" width: 100%; height: 25px;" id="rechSiretCli"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<input type="number" value="0" hidden id="ligneCli">
+			<div class="container" id="containerRechCliBody" style="height: 80%; width: 100%; padding: 5px 0 5px 0;">
+				<div class="row" style="overflow: hidden; margin-left: 3%;">
+					<div class="row" style="height: 100%; overflow: scroll; overflow-x: hidden; margin-right: -20px;">
+						<div class="row" style="width: 100%; padding: 0 30px 0 30px">
+							<div class="col-sm-2" style="padding: 0; height: 25px; border: 1px solid black; text-align: center; border-right: none; background-color: #222222; opacity: 0.9; color: white;">Code</div>
+							<div class="col-sm-2" style="padding: 0; height: 25px; border: 1px solid black; text-align: center; border-right: none; background-color: #222222; opacity: 0.9; color: white;">Titre / Forme</div>
+							<div class="col-sm-5" style="padding: 0; height: 25px; border: 1px solid black; text-align: center; border-right: none; background-color: #222222; opacity: 0.9; color: white;">Identité</div>
+							<div class="col-sm-1" style="padding: 0; height: 25px; border: 1px solid black; text-align: center; border-right: none; background-color: #222222; opacity: 0.9; color: white;">Catégorie</div>
+							<div class="col-sm-2" style="padding: 0; height: 25px; border: 1px solid black; text-align: center; background-color: #222222; opacity: 0.9; color: white;">Ville</div>
+						</div>
+					</div>
+				</div>
+				<div class="row" style="height: 85%; overflow: hidden; margin-left: 3%;">
+					<div class="row" style="height: 100%; overflow: scroll; overflow-x: hidden; margin-right: -20px;">
+<?php
+	for ($i = 0; $i <= 300; $i++)
+	{
+?>
+						<div class="row" style="width: 100%; padding: 0 30px 0 30px">
+							<div class="col-sm-2" style="padding: 0; border: 1px solid black; text-align: center; border-right: none; border-top: none; height: 50px;" id="codeCli<?php echo $i; ?>" ondblclick="selectCli(<?php echo $i; ?>);"></div>
+							<div class="col-sm-2" style="padding: 0; border: 1px solid black; text-align: center; border-right: none; border-top: none; height: 50px;" id="formeCli<?php echo $i; ?>"ondblclick="selectCli(<?php echo $i; ?>);"></div>
+							<div class="col-sm-5" style="padding: 0; border: 1px solid black; text-align: center; border-right: none; border-top: none; height: 50px;" id="identiteCli<?php echo $i; ?>"ondblclick="selectCli(<?php echo $i; ?>);"></div>
+							<div class="col-sm-1" style="padding: 0; border: 1px solid black; text-align: center; border-right: none; border-top: none; height: 50px;" id="categorieCli<?php echo $i; ?>"ondblclick="selectCli(<?php echo $i; ?>);"></div>
+							<div class="col-sm-2" style="padding: 0; border: 1px solid black; text-align: center; border-top: none; height: 50px;" id="villeCli<?php echo $i; ?>"ondblclick="selectCli(<?php echo $i; ?>);"></div>
+						</div>
+<?php
+	}
+?>
+					</div>
+				</div>
+				<div class="row" style="margin-top: 1%;">
+					<div style="height: 25px; width: 100%; padding: 0; text-align: center;">Double clique sur l'un des clients pour l'ajouter à la liste des fournisseurs</div>
+				</div>
+			</div>
+
+			<div class="container" id="containerRechCliFooter" style="height: 10%; width: 100%; border-top: 1px solid black;">
+				<button onclick="$('#rechCli').css('visibility', 'hidden');$('#transparenceProd').css('visibility', 'hidden');" style="width: 70px; height: 90%; margin: 0.3% 0 0.3% 0; float: right;" class="btn btn-warning"><span class="glyphicon glyphicon-home"></span><br>Fermer</button>
+			</div>
+		</div>
+
+
 
 		<div class="container" id="rechFamilleProd">
+			<div class="container" id="transparenceFamille"></div>
+			<div class="container" id="containerAddFamille">
+				<div class="row" style="width: 100%; margin: 0;">
+					<div class="col-sm-12"><h3 style="text-transform: uppercase; text-indent: 0.5em; color: #990099; font-weight: bold; text-shadow: 5px 5px #AAAAAA;">Détail d'une famille</h3></div>
+				</div>
+				<div class="row" style="width: 100%; margin: 20px 0 0 0;">
+					<div class="col-sm-1"></div>
+					<div class="col-sm-11" style="font-weight: bold; font-size: 13px;">Libellé <input type="text" style="width: 60%; margin-left: 2%;"></div>
+				</div>
+				<div class="row" style="width: 100%; margin: 1% 0 0 0;">
+					<div class="col-sm-1"></div>
+					<div class="col-sm-11" style="padding-left: 13.5%; font-weight: bold; font-size: 13px;"><input type="checkbox" style="width: 15px; height: 15px; margin: 0;"> Actif</div>
+				</div>
+				<div class="row" style="margin: 0; position: absolute; bottom: 0; left: 0; right: 0; width: 100%; height: 16%; padding: 0.5%; border-top: 1px solid black;">
+					<div class="col-sm-12" style="text-align: right; width: 100%; padding: 0; margin: 0;">
+						<button style="padding: 1px 1px 2px 1px; width: 70px; height: 99%; margin-right: 2%;">Enregistrer</button>
+						<button onclick="$('#containerAddFamille').css('visibility', 'hidden'); $('#transparenceFamille').css('visibility', 'hidden');" style="padding: 1px 1px 2px 1px; width: 70px; height: 99%; float: right;">Fermer</button>
+					</div>
+				</div>
+			</div>
+
 			<div class="container" id="containerFamilleHeader" style="height: 8%;"></div>
 			<div class="container" id="containerFamilleBody" style="height: 82%; overflow: auto; overflow-x: hidden; padding-bottom: 20px; width: 100%;">
 				<div class="row" style="margin-bottom: 1%;">
 					<div class="col-sm-8"></div>
 					<div class="col-sm-3">
 						<button class="btn btn-danger" style="height: 30px; padding: 0; width: 35px; float: right; margin-left: 5px;"><span class="glyphicon glyphicon-minus"></span></button>
-						<button class="btn btn-success" style="height: 30px; padding: 0; width: 35px; float: right;"><span class="glyphicon glyphicon-plus"></span></button>
+						<button onclick="$('#transparenceFamille').css('visibility', 'visible'); $('#containerAddFamille').css('visibility', 'visible');" class="btn btn-success" style="height: 30px; padding: 0; width: 35px; float: right;"><span class="glyphicon glyphicon-plus"></span></button>
 					</div>
 					<div class="col-sm-1"></div>
 				</div>
@@ -656,7 +977,7 @@
 						</select>
 					</div>
 					<div class="col-sm-2" style="padding-left: 8%;">
-						<button onclick="document.getElementById('transparenceProd').style.visibility = 'visible'; document.getElementById('rechFamilleProd').style.visibility = 'visible';" title="Rechercher une famille" style="width: 25px; height: 25px; padding: 0;"><span class="glyphicon glyphicon-search"></span></button>
+						<button onclick="document.getElementById('transparenceProd').style.visibility = 'visible'; document.getElementById('rechFamilleProd').style.visibility = 'visible';" style="width: 25px; height: 25px; padding: 0;" id="btnRechFamille"><span class="glyphicon glyphicon-search"></span></button>
 					</div>
 				</div>
 				<div class="col-sm-5" style=" margin-bottom: 5px;">
@@ -725,8 +1046,9 @@
 			<div class="row" style="margin-top: 1.2%;">
 				<div class="col-sm-2"><h4 style="font-weight: bold; font-size: 15px;">FOURNISSEUR</h4></div>
 				<div class="col-sm-5">
-						<button class="btn btn-danger" style="height: 30px; padding: 0; width: 35px; float: right; margin-left: 5px; margin-right: 10%;"><span class="glyphicon glyphicon-minus"></span></button>
-						<button class="btn btn-success" style="height: 30px; padding: 0; width: 35px; float: right;"><span class="glyphicon glyphicon-plus"></span></button>
+						<button onclick="pdf()" class="btn btn-danger" style="height: 30px; padding: 0; width: 35px; float: right; margin-left: 0; margin-right: 10%;" id="delSelectFourn">PDF</button>
+						<button onclick="delSelectFournProd()" class="btn btn-danger" style="height: 30px; padding: 0; width: 35px; float: right; margin-left: 5px; margin-right: 1%;" id="delSelectFourn" disabled><span class="glyphicon glyphicon-minus"></span></button>
+						<button onclick="$('#rechCli').css('visibility', 'visible');$('#transparenceProd').css('visibility', 'visible'); effaceAllCli();"class="btn btn-success" style="height: 30px; padding: 0; width: 35px; float: right;"><span class="glyphicon glyphicon-plus"></span></button>
 				</div>
 				<div class="col-sm-5"></div>
 			</div>
@@ -744,6 +1066,7 @@
 							</div>
 						</div>
 					</div>
+					<input type="text" id="saveLigneFournProd" hidden value="0">
 					<div class="row">
 <?php
 	for ($i = 0; $i <= 6; $i++) 
@@ -751,12 +1074,13 @@
 ?>
 					<div class="row">
 						<input type="number" id="numFournisseur<?= $i; ?>" hidden>
+						<input type="text" id="codeFourn<?= $i ?>" hidden>
 						<div class="col-sm-1"></div>
 						<div class="col-sm-10">
 							<div class="row" style="background-color: white">
-								<div class="col-sm-2" style="height: 20px; border: 1px solid black; border-right: none; border-top: none;" id="infoFormeFournisseur<?= $i ?>" onclick="commentaireFournisseur(<?= $i; ?>)"></div>
-								<div class="col-sm-5" style="height: 20px; border: 1px solid black; border-right: none; border-top: none;" id="infoRaisonSocialeFournisseur<?= $i ?>" onclick="commentaireFournisseur(<?= $i; ?>)"></div>
-								<div class="col-sm-5" style="height: 20px; border: 1px solid black; border-top: none;" id="infoCategorieFournisseur<?= $i ?>" onclick="commentaireFournisseur(<?= $i; ?>)"></div>
+								<div class="col-sm-2" style="height: 20px; border: 1px solid black; border-right: none; border-top: none;" id="infoFormeFournisseur<?= $i ?>" onclick="selectFournProd(<?= $i; ?>); commentaireFournisseur(<?= $i; ?>);"></div>
+								<div class="col-sm-5" style="height: 20px; border: 1px solid black; border-right: none; border-top: none;" id="infoRaisonSocialeFournisseur<?= $i ?>" onclick="selectFournProd(<?= $i; ?>); commentaireFournisseur(<?= $i; ?>);"></div>
+								<div class="col-sm-5" style="height: 20px; border: 1px solid black; border-top: none;" id="infoCategorieFournisseur<?= $i ?>" onclick="selectFournProd(<?= $i; ?>); commentaireFournisseur(<?= $i; ?>);"></div>
 							</div>
 						</div>
 					</div>
@@ -979,7 +1303,7 @@
 					</div>
 				</div>
 				<div class="col-sm-2" style="padding-left: 0; margin-left: -7%;">
-					<button onclick="document.getElementById('transparenceFourn').style.visibility = 'visible'; document.getElementById('rechCategorieFourn').style.visibility = 'visible';" title="Rechercher une famille" style="width: 25px; height: 25px; padding: 0;"><span class="glyphicon glyphicon-search"></span></button>
+					<button onclick="document.getElementById('transparenceFourn').style.visibility = 'visible'; document.getElementById('rechCategorieFourn').style.visibility = 'visible';" style="width: 25px; height: 25px; padding: 0;" id="btnRechCategorie"><span class="glyphicon glyphicon-search"></span></button>
 				</div>
 			</div>
 			<div class="row">
@@ -1012,7 +1336,7 @@
 	}
 ?>
 						</select>
-						<button onclick="document.getElementById('transparenceFourn').style.visibility = 'visible'; document.getElementById('rechFormeJuridiqueFourn').style.visibility = 'visible';" title="Rechercher une famille" style="width: 25px; height: 25px; padding: 0; margin-left: 1px;"><span class="glyphicon glyphicon-search"></span></button>
+						<button onclick="document.getElementById('transparenceFourn').style.visibility = 'visible'; document.getElementById('rechFormeJuridiqueFourn').style.visibility = 'visible';" style="width: 25px; height: 25px; padding: 0; margin-left: 1px;" id="btnRechFormeJuridique"><span class="glyphicon glyphicon-search"></span></button>
 					</div>					
 				</div>
 				<div class="col-sm-5">
